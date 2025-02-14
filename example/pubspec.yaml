@@ -14,6 +14,8 @@ dependencies:
     path: ../
 
   file_picker: any
+  universal_html: ^2.0.0
+  pointer_interceptor: any
 
 dev_dependencies:
   flutter_test:
