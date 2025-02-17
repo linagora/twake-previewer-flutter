@@ -1,3 +1,7 @@
+## 0.0.4
+
+- Add plain text previewer
+
 ## 0.0.3
 
 - Add image previewer
