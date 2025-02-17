@@ -1,6 +1,6 @@
 name: twake_previewer_flutter
 description: "File previewer for Twake Workplace"
-version: 0.0.2
+version: 0.0.3
 repository: https://github.com/linagora/twake-previewer-flutter
 
 environment:

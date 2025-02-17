@@ -54,6 +54,7 @@ import 'package:twake_previewer_flutter/core/previewer_options/options/top_bar_o
 import 'package:twake_previewer_flutter/core/previewer_options/previewer_options.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/options/html_view_options.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/twake_html_previewer.dart';
+import 'package:twake_previewer_flutter/twake_image_previewer/twake_image_previewer.dart';
 import 'package:twake_previewer_flutter/twake_pdf_previewer/twake_pdf_previewer.dart';
 
 void main() {
@@ -149,6 +150,19 @@ class ExampleViewer extends StatelessWidget {
             ),
           );
         },
+      );
+    }
+
+    if (['png', 'jpg', 'jpeg', 'gif'].contains(extension)) {
+      return Center(
+        child: TwakeImagePreviewer(
+          bytes: bytes,
+          previewerOptions: const PreviewerOptions(width: 600),
+          topBarOptions: TopBarOptions(
+            title: 'Some title',
+            onClose: () => debugPrint('onClose'),
+          ),
+        ),
       );
     }
 
