@@ -1,3 +1,7 @@
+## 0.0.6
+
+- Fix web compile error
+
 ## 0.0.5
 
 - Fix a bug where pdf controller was not used
