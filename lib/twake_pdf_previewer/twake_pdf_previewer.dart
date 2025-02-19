@@ -73,6 +73,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
         if (previewerState == PreviewerState.success && widget.bytes != null) {
           return PdfPreviewer(
             bytes: widget.bytes!,
+            controller: _pdfViewerController,
             onError: widget.previewerOptions.onError,
             onTapOutside: widget.onTapOutside,
           );

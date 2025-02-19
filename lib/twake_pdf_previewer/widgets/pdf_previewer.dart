@@ -8,11 +8,13 @@ class PdfPreviewer extends StatefulWidget {
   const PdfPreviewer({
     super.key,
     required this.bytes,
+    required this.controller,
     this.onError,
     this.onTapOutside,
   });
 
   final Uint8List bytes;
+  final PdfViewerController controller;
   final void Function(dynamic error)? onError;
   final VoidCallback? onTapOutside;
 
@@ -26,7 +28,7 @@ class _PdfPreviewerState extends State<PdfPreviewer> {
   @override
   void initState() {
     super.initState();
-    _pdfViewerController = PdfViewerController();
+    _pdfViewerController = widget.controller;
   }
 
   @override
