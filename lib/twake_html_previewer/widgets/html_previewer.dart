@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui_web';
 
 import 'package:flutter/cupertino.dart';
 import 'package:twake_previewer_flutter/core/utils/utils.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/utils/html_templates.dart';
+import 'package:twake_previewer_flutter/twake_html_previewer/utils/twake_dart_ui.dart';
 import 'package:universal_html/html.dart';
 
 class HtmlPreviewer extends StatefulWidget {

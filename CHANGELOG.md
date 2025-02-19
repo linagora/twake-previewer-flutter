@@ -1,3 +1,8 @@
+## 0.0.5
+
+- Fix a bug where pdf controller was not used
+- Create dart_ui_stub to make this package compilable on mobile platform
+
 ## 0.0.4
 
 - Add plain text previewer
