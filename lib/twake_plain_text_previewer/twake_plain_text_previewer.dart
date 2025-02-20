@@ -43,7 +43,8 @@ class _TwakePlainTextPreviewerState extends State<TwakePlainTextPreviewer> {
 
   @override
   Widget build(BuildContext context) {
-    final previewerChild = SizedBox(
+    final previewerChild = Container(
+      color: Colors.white,
       width: widget.previewerOptions?.width,
       height: widget.previewerOptions?.height,
       child: Text(text),

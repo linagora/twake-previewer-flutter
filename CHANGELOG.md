@@ -1,3 +1,7 @@
+## 0.0.7
+
+- Add white background to text previewer
+
 ## 0.0.6
 
 - Fix web compile error
