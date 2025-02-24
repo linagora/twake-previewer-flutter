@@ -2,72 +2,172 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:pdfrx/pdfrx.dart';
 
-class PdfPreviewer extends StatefulWidget {
+class PdfPreviewer extends StatelessWidget {
   const PdfPreviewer({
     super.key,
     required this.bytes,
     required this.controller,
-    this.onError,
+    this.fileName,
     this.onTapOutside,
+    this.onReady,
   });
 
   final Uint8List bytes;
   final PdfViewerController controller;
-  final void Function(dynamic error)? onError;
+  final String? fileName;
   final VoidCallback? onTapOutside;
+  final VoidCallback? onReady;
 
-  @override
-  State<PdfPreviewer> createState() => _PdfPreviewerState();
-}
+  static const double _minScale = 1;
+  static const double _maxScale = 4;
+  static const double _scrollbarWidth = 10;
 
-class _PdfPreviewerState extends State<PdfPreviewer> {
-  late final PdfViewerController _pdfViewerController;
+  int? _calculateCurrentPageNumber(
+    Rect visibleRect,
+    List<Rect> pageRects,
+    PdfViewerController controller,
+  ) {
+    if (pageRects.isEmpty) {
+      return null;
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    _pdfViewerController = widget.controller;
+    if (pageRects.first.top == visibleRect.top) {
+      return 1; // view at top
+    }
+
+    if (pageRects.last.bottom == visibleRect.bottom) {
+      return pageRects.length; // view at bottom
+    }
+
+    final intersectRatios = <double>[];
+    for (var i = 0; i < pageRects.length; i++) {
+      final intersect = pageRects[i].intersect(visibleRect);
+      if (intersect.isEmpty) {
+        intersectRatios.add(0);
+        continue;
+      }
+
+      final intersectRatio = (intersect.width * intersect.height) /
+          (pageRects[i].width * pageRects[i].height);
+      intersectRatios.add(intersectRatio);
+    }
+    final maxIntersectRatio = intersectRatios.reduce(max);
+    return intersectRatios.indexOf(maxIntersectRatio) + 1;
   }
 
-  @override
-  void dispose() {
-    _pdfViewerController.dispose();
-    super.dispose();
+  PdfPageLayout _layoutPdf(
+    BuildContext context,
+    List<PdfPage> pages,
+    PdfViewerParams params,
+  ) {
+    final viewWidth = MediaQuery.sizeOf(context).width;
+    final viewHeight = MediaQuery.sizeOf(context).height;
+    final width = pages.fold(0.0, (prev, page) => max(prev, page.width)) +
+        params.margin * 2;
+    final pageLayouts = <Rect>[];
+    double top = params.margin;
+    for (final page in pages) {
+      pageLayouts.add(
+        Rect.fromLTWH(
+          viewWidth > viewHeight ? (width - page.width) / 2 : 0,
+          top,
+          page.width,
+          page.height,
+        ),
+      );
+      top += page.height + params.margin;
+    }
+
+    return PdfPageLayout(
+      pageLayouts: pageLayouts,
+      documentSize: Size(width, top),
+    );
+  }
+
+  double get _tapOutSideZoneWidth {
+    final documentWidth =
+        controller.documentSize.width - controller.params.margin * 2;
+    final documentRenderWidth = documentWidth * controller.currentZoom;
+    final viewSizeWidth = controller.viewSize.width;
+
+    return viewSizeWidth > documentRenderWidth
+        ? (viewSizeWidth - documentRenderWidth) / 2
+        : 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    return PdfViewer.openData(
-      widget.bytes,
-      viewerController: _pdfViewerController,
-      onError: widget.onError,
+    return PdfViewer.data(
+      bytes,
+      controller: controller,
+      sourceName: fileName ?? 'file.pdf',
       params: PdfViewerParams(
         panAxis: PanAxis.vertical,
         scrollByMouseWheel: 0.5,
-        layoutPages: (viewSize, pages) {
-          List<Rect> rect = [];
-          final viewWidth = viewSize.width;
-          final viewHeight = viewSize.height;
-          final maxHeight = pages.fold<double>(
-              0.0, (maxHeight, page) => max(maxHeight, page.height));
-          final maxWidth = pages.fold<double>(
-              0.0, (maxWidth, page) => max(maxWidth, page.width));
-          final ratio = viewHeight / max(maxHeight, maxWidth);
-          var top = 0.0;
-          double padding = 16.0;
-          for (var page in pages) {
-            final width = page.width * ratio;
-            final height = page.height * ratio;
-            final left =
-                viewWidth > viewHeight ? (viewWidth / 2) - (width / 2) : 0.0;
-            rect.add(Rect.fromLTWH(left, top, width, height));
-            top += height + padding;
-          }
-          return rect;
+        backgroundColor: Colors.transparent,
+        onViewerReady: (document, controller) {
+          controller.setZoom(controller.centerPosition, 1);
+          onReady?.call();
+          // _showPagination.value = true;
         },
-        onClickOutSidePageViewer: widget.onTapOutside,
+        calculateCurrentPageNumber: _calculateCurrentPageNumber,
+        minScale: _minScale,
+        maxScale: _maxScale,
+        boundaryMargin: const EdgeInsets.all(double.infinity),
+        onInteractionEnd: (details) {
+          if (controller.currentZoom < _minScale) {
+            controller.setZoom(
+              controller.centerPosition,
+              _minScale,
+            );
+          } else if (controller.currentZoom > _maxScale) {
+            controller.setZoom(
+              controller.centerPosition,
+              _maxScale,
+            );
+          }
+        },
+        layoutPages: (pages, params) => _layoutPdf(
+          context,
+          pages,
+          params,
+        ),
+        viewerOverlayBuilder: (_, __, ___) => [
+          Positioned(
+            left: 0,
+            height: controller.documentSize.height,
+            width: _tapOutSideZoneWidth,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: onTapOutside,
+              child: const IgnorePointer(
+                child: SizedBox.expand(),
+              ),
+            ),
+          ),
+          Positioned(
+            right: _scrollbarWidth,
+            height: controller.documentSize.height,
+            width: _tapOutSideZoneWidth - _scrollbarWidth,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: onTapOutside,
+              child: const IgnorePointer(
+                child: SizedBox.expand(),
+              ),
+            ),
+          ),
+          PdfViewerScrollThumb(
+            controller: controller,
+            orientation: ScrollbarOrientation.right,
+            thumbSize: const Size(_scrollbarWidth, 100),
+            thumbBuilder: (_, __, ___, ____) => const ColoredBox(
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,7 @@
+## 0.0.8
+
+- Replace pdf_render with pdfrx
+
 ## 0.0.7
 
 - Add white background to text previewer

@@ -17,30 +17,6 @@ A Flutter web application for previewing various file formats.
 
 - **Web:** Currently, all preview functionalities are only available on the web platform. Future platform support may be considered.
 
-## Getting Started
-
-- Add this right above `<script src="flutter_bootstrap.js" async></script>`:
-
-```html
-<!-- IMPORTANT: load pdfjs files -->
-<script
-  src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js"
-  type="text/javascript"
-></script>
-<script type="text/javascript">
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js";
-  pdfRenderOptions = {
-    // where cmaps are downloaded from
-    cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/",
-    // The cmaps are compressed in the case
-    cMapPacked: true,
-    // any other options for pdfjsLib.getDocument.
-    // params: {}
-  };
-</script>
-```
-
 ## Example
 
 ```dart

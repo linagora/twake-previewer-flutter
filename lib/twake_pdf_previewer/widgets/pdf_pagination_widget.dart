@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 enum ZoomState { activate, inactivate }
 
@@ -146,8 +146,7 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
   }
 
   void _pageChanged({String? property}) {
-    _pageCurrentNotifier.value =
-        widget.pdfViewerController?.currentPageNumber ?? 1;
+    _pageCurrentNotifier.value = widget.pdfViewerController?.pageNumber ?? 1;
     _updateZoomState();
   }
 
@@ -169,7 +168,10 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
         _zoomLevel = 4.0;
       }
       _updateZoomState();
-      widget.pdfViewerController?.setZoomRatio(zoomRatio: _zoomLevel);
+      widget.pdfViewerController?.setZoom(
+        widget.pdfViewerController!.centerPosition,
+        _zoomLevel,
+      );
     }
   }
 
@@ -191,12 +193,15 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
         _zoomLevel = 3.5;
       }
       _updateZoomState();
-      widget.pdfViewerController?.setZoomRatio(zoomRatio: _zoomLevel);
+      widget.pdfViewerController?.setZoom(
+        widget.pdfViewerController!.centerPosition,
+        _zoomLevel,
+      );
     }
   }
 
   void _updateZoomState() {
-    final zoomLevel = widget.pdfViewerController?.zoomRatio ?? 1.0;
+    final zoomLevel = widget.pdfViewerController?.currentZoom ?? 1.0;
     if (zoomLevel <= _maxZoomLevelDefault && zoomLevel > _minZoomLevelDefault) {
       _zoomOutPageNotifier.value = ZoomState.activate;
     } else {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:pdfrx/pdfrx.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/loading_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/previewer_state.dart';
@@ -38,6 +38,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
   late ValueNotifier<PreviewerState> _previewerState;
   final _pdfViewerController = PdfViewerController();
   final _keyboardFocusNode = FocusNode();
+  bool _pdfViewerIsReady = false;
 
   @override
   void initState() {
@@ -52,7 +53,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
             widget.previewerOptions.previewerState &&
         widget.previewerOptions.previewerState != _previewerState.value) {
       setState(() {
-        _previewerState.value = widget.previewerOptions.previewerState;
+        _previewerState = ValueNotifier(widget.previewerOptions.previewerState);
       });
     }
   }
@@ -60,7 +61,6 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
   @override
   void dispose() {
     _previewerState.dispose();
-    _pdfViewerController.dispose();
     _keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -74,8 +74,9 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
           return PdfPreviewer(
             bytes: widget.bytes!,
             controller: _pdfViewerController,
-            onError: widget.previewerOptions.onError,
+            fileName: widget.topBarOptions?.title,
             onTapOutside: widget.onTapOutside,
+            onReady: () => setState(() => _pdfViewerIsReady = true),
           );
         } else if (previewerState == PreviewerState.loading) {
           return CircularPercentIndicator(
@@ -134,36 +135,11 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
       ),
     );
 
-    final paginationChild = ValueListenableBuilder(
-      valueListenable: _pdfViewerController,
-      builder: (_, __, ___) {
-        if (!_pdfViewerController.isReady) {
-          return const SizedBox.shrink();
-        }
-
-        return PdfPaginationWidget(
-          pdfViewerController: _pdfViewerController,
-        );
-      },
-    );
-
-    final backgroundChild = ValueListenableBuilder(
-      valueListenable: _pdfViewerController,
-      builder: (context, m, child) {
-        if (!_pdfViewerController.isReady) return Container();
-        final v = _pdfViewerController.viewRect;
-        final all = _pdfViewerController.fullSize;
-        final top = v.top / all.height * v.height;
-        final height = v.height / all.height * v.height;
-        return Positioned(
-          right: 0,
-          top: top,
-          height: height,
-          width: 8,
-          child: Container(color: const Color(0xFF818C99)),
-        );
-      },
-    );
+    final paginationChild = _pdfViewerIsReady
+        ? PdfPaginationWidget(
+            pdfViewerController: _pdfViewerController,
+          )
+        : const SizedBox.shrink();
 
     return KeyboardListener(
       focusNode: _keyboardFocusNode,
@@ -181,7 +157,6 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
             alignment: AlignmentDirectional.bottomCenter,
             child: paginationChild,
           ),
-          backgroundChild,
         ],
       ),
     );
