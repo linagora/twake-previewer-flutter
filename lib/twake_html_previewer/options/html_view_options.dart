@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
 class HtmlViewOptions extends Equatable {
-  final String contentClass;
+  final String contentClassName;
   final TextDirection? direction;
   final String? styleCss;
   final String? scripts;
@@ -13,7 +13,7 @@ class HtmlViewOptions extends Equatable {
   final bool keepWidthWhileLoading;
 
   const HtmlViewOptions({
-    required this.contentClass,
+    required this.contentClassName,
     this.direction,
     this.styleCss,
     this.scripts,
@@ -26,7 +26,7 @@ class HtmlViewOptions extends Equatable {
 
   @override
   List<Object?> get props => [
-        contentClass,
+        contentClassName,
         direction,
         styleCss,
         scripts,

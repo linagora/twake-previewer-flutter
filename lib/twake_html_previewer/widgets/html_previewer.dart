@@ -9,7 +9,7 @@ import 'package:universal_html/html.dart';
 
 class HtmlPreviewer extends StatefulWidget {
   final String contentHtml;
-  final String contentClass;
+  final String contentClassName;
   final double widthContent;
   final double heightContent;
   final double minHeight;
@@ -32,7 +32,7 @@ class HtmlPreviewer extends StatefulWidget {
   const HtmlPreviewer({
     super.key,
     required this.contentHtml,
-    required this.contentClass,
+    required this.contentClassName,
     required this.widthContent,
     required this.heightContent,
     required this.minHeight,
@@ -150,15 +150,11 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
     }
 
     if (widget.heightContent != oldWidget.heightContent) {
-      setState(() {
-        _actualHeight = widget.heightContent;
-      });
+      _actualHeight = widget.heightContent;
     }
 
     if (widget.widthContent != oldWidget.widthContent) {
-      setState(() {
-        _actualWidth = widget.widthContent;
-      });
+      _actualWidth = widget.widthContent;
     }
   }
 
@@ -176,7 +172,7 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
 
     final htmlTemplate = HtmlTemplates.generate(
       content: content,
-      contentClass: widget.contentClass,
+      contentClassName: widget.contentClassName,
       minHeight: widget.minHeight,
       minWidth: _minWidth,
       styleCSS: widget.styleCss,

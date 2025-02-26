@@ -125,7 +125,7 @@ class HtmlTemplates {
 
   static String generate({
     required String content,
-    required String contentClass,
+    required String contentClassName,
     double? minHeight,
     double? minWidth,
     String? styleCSS,
@@ -140,7 +140,7 @@ class HtmlTemplates {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
       <style>
-        .$contentClass {
+        .$contentClassName {
           min-height: ${minHeight ?? 0}px;
           min-width: ${minWidth ?? 0}px;
           overflow: auto;
@@ -158,7 +158,7 @@ class HtmlTemplates {
       </style>
       </head>
       <body ${direction == TextDirection.rtl ? 'dir="rtl"' : ''} style = "overflow-x: hidden">
-      <div class="$contentClass">$content</div>
+      <div class="$contentClassName">$content</div>
       ${javaScripts ?? ''}
       </body>
       </html> 

@@ -52,9 +52,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
     if (oldWidget.previewerOptions.previewerState !=
             widget.previewerOptions.previewerState &&
         widget.previewerOptions.previewerState != _previewerState.value) {
-      setState(() {
-        _previewerState = ValueNotifier(widget.previewerOptions.previewerState);
-      });
+      _previewerState = ValueNotifier(widget.previewerOptions.previewerState);
     }
   }
 

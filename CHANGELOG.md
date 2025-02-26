@@ -1,3 +1,15 @@
+## 0.0.10
+
+- Add zoomable option to image previewer
+- Ignore flutter-plugins and flutter-plugins-dependencies from git
+
+## 0.0.9
+
+- Optimize Utils
+- Optimize PDF previewer
+- Optimize HTML previewer
+- Update `HtmlViewOptions` `contentClass` to `contentClassName`
+
 ## 0.0.8
 
 - Replace pdf_render with pdfrx
