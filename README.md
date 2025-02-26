@@ -119,7 +119,7 @@ class ExampleViewer extends StatelessWidget {
                 height: constraints.maxHeight,
               ),
               htmlViewOptions: const HtmlViewOptions(
-                contentClass: 'sample-content',
+                contentClassName: 'sample-content',
               ),
               topBarOptions: TopBarOptions(
                 title: 'Some title',

@@ -45,9 +45,7 @@ class _TwakeHtmlPreviewerState extends State<TwakeHtmlPreviewer> {
   void didUpdateWidget(covariant TwakeHtmlPreviewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.bytes != oldWidget.bytes) {
-      setState(() {
-        _contentHtml = widget.bytes == null ? '' : utf8.decode(widget.bytes!);
-      });
+      _contentHtml = widget.bytes == null ? '' : utf8.decode(widget.bytes!);
     }
   }
 
@@ -61,7 +59,7 @@ class _TwakeHtmlPreviewerState extends State<TwakeHtmlPreviewer> {
           children: [
             HtmlPreviewer(
               contentHtml: _contentHtml,
-              contentClass: widget.htmlViewOptions.contentClass,
+              contentClassName: widget.htmlViewOptions.contentClassName,
               widthContent: widget.previewerOptions.width ?? 0,
               heightContent: widget.previewerOptions.height ?? 0,
               minHeight: _minHeight,
