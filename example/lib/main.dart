@@ -113,6 +113,7 @@ class ExampleViewer extends StatelessWidget {
       return Center(
         child: TwakeImagePreviewer(
           bytes: bytes,
+          zoomable: true,
           previewerOptions: const PreviewerOptions(width: 600),
           topBarOptions: TopBarOptions(
             title: 'Some title',
