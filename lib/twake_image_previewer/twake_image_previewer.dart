@@ -12,16 +12,18 @@ class TwakeImagePreviewer extends StatelessWidget {
     this.errorBuilder,
     this.previewerOptions,
     this.topBarOptions,
+    this.zoomable = false,
   });
 
   final Uint8List? bytes;
   final Widget Function(BuildContext, Object, StackTrace?)? errorBuilder;
   final PreviewerOptions? previewerOptions;
   final TopBarOptions? topBarOptions;
+  final bool zoomable;
 
   @override
   Widget build(BuildContext context) {
-    final previewerChild = bytes == null
+    Widget previewerChild = bytes == null
         ? const SizedBox()
         : Image.memory(
             bytes!,
@@ -29,6 +31,14 @@ class TwakeImagePreviewer extends StatelessWidget {
             height: previewerOptions?.height,
             errorBuilder: errorBuilder,
           );
+
+    if (zoomable) {
+      previewerChild = InteractiveViewer(
+        child: Center(
+          child: previewerChild,
+        ),
+      );
+    }
 
     final topBarChild = topBarOptions == null
         ? const SizedBox()
@@ -46,9 +56,7 @@ class TwakeImagePreviewer extends StatelessWidget {
       children: [
         topBarChild,
         Expanded(
-          child: SingleChildScrollView(
-            child: previewerChild,
-          ),
+          child: previewerChild,
         ),
       ],
     );
