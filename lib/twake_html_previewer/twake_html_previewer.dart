@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/loading_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/top_bar_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/previewer_options.dart';
+import 'package:twake_previewer_flutter/core/widgets/previewer_template_widget.dart';
 import 'package:twake_previewer_flutter/core/widgets/top_bar_widget.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/options/html_view_options.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/widgets/html_previewer.dart';
@@ -51,43 +52,47 @@ class _TwakeHtmlPreviewerState extends State<TwakeHtmlPreviewer> {
 
   @override
   Widget build(BuildContext context) {
-    final previewerChild = LayoutBuilder(
-      builder: (context, constraint) {
-        _minHeight = math.max(constraint.maxHeight, _minHeight);
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            HtmlPreviewer(
-              contentHtml: _contentHtml,
-              contentClassName: widget.htmlViewOptions.contentClassName,
-              widthContent: widget.previewerOptions.width ?? 0,
-              heightContent: widget.previewerOptions.height ?? 0,
-              minHeight: _minHeight,
-              allowResizeToDocumentSize:
-                  widget.htmlViewOptions.allowResizeToDocumentSize,
-              disableZoom: widget.htmlViewOptions.disableZoom,
-              direction: widget.htmlViewOptions.direction,
-              onClickHyperLinkAction:
-                  widget.htmlViewOptions.onClickHyperLinkAction,
-              mailtoDelegate: widget.htmlViewOptions.mailtoDelegate,
-              keepWidthWhileLoading:
-                  widget.htmlViewOptions.keepWidthWhileLoading,
-              styleCss: widget.htmlViewOptions.styleCss,
-              scripts: widget.htmlViewOptions.scripts,
-              onLoaded: () => setState(() => _isLoading = false),
-            ),
-            if (_isLoading)
-              Container(
-                padding: const EdgeInsets.all(16),
-                width: 30,
-                height: 30,
-                child: CupertinoActivityIndicator(
-                  color: widget.loadingOptions?.progressColor,
-                ),
+    final previewerChild = PreviewerTemplateWidget(
+      previewerOptions: widget.previewerOptions,
+      loadingOptions: widget.loadingOptions,
+      child: LayoutBuilder(
+        builder: (context, constraint) {
+          _minHeight = math.max(constraint.maxHeight, _minHeight);
+          return Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              HtmlPreviewer(
+                contentHtml: _contentHtml,
+                contentClassName: widget.htmlViewOptions.contentClassName,
+                widthContent: widget.previewerOptions.width ?? 0,
+                heightContent: widget.previewerOptions.height ?? 0,
+                minHeight: _minHeight,
+                allowResizeToDocumentSize:
+                    widget.htmlViewOptions.allowResizeToDocumentSize,
+                disableZoom: widget.htmlViewOptions.disableZoom,
+                direction: widget.htmlViewOptions.direction,
+                onClickHyperLinkAction:
+                    widget.htmlViewOptions.onClickHyperLinkAction,
+                mailtoDelegate: widget.htmlViewOptions.mailtoDelegate,
+                keepWidthWhileLoading:
+                    widget.htmlViewOptions.keepWidthWhileLoading,
+                styleCss: widget.htmlViewOptions.styleCss,
+                scripts: widget.htmlViewOptions.scripts,
+                onLoaded: () => setState(() => _isLoading = false),
               ),
-          ],
-        );
-      },
+              if (_isLoading)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  width: 30,
+                  height: 30,
+                  child: CupertinoActivityIndicator(
+                    color: widget.loadingOptions?.progressColor,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
 
     final topBarChild = widget.topBarOptions == null
