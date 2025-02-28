@@ -1,3 +1,9 @@
+## 0.0.11
+
+- Create a template for all previewers
+- Add Esc key to dismiss for all previewers
+- Handle tap outside previewers to dismiss
+
 ## 0.0.10
 
 - Add zoomable option to image previewer
