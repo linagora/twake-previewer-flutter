@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdfrx/pdfrx.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/loading_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/previewer_state.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/top_bar_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/previewer_options.dart';
-import 'package:twake_previewer_flutter/core/widgets/circle_loading_widget.dart';
+import 'package:twake_previewer_flutter/core/utils/utils.dart';
+import 'package:twake_previewer_flutter/core/widgets/previewer_template_widget.dart';
 import 'package:twake_previewer_flutter/core/widgets/top_bar_widget.dart';
 import 'package:twake_previewer_flutter/twake_pdf_previewer/widgets/pdf_pagination_widget.dart';
 import 'package:twake_previewer_flutter/twake_pdf_previewer/widgets/pdf_previewer.dart';
@@ -65,51 +65,16 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
 
   @override
   Widget build(BuildContext context) {
-    final previewerChild = ValueListenableBuilder(
-      valueListenable: _previewerState,
-      builder: (context, previewerState, _) {
-        if (previewerState == PreviewerState.success && widget.bytes != null) {
-          return PdfPreviewer(
-            bytes: widget.bytes!,
-            controller: _pdfViewerController,
-            fileName: widget.topBarOptions?.title,
-            onTapOutside: widget.onTapOutside,
-            onReady: () => setState(() => _pdfViewerIsReady = true),
-          );
-        } else if (previewerState == PreviewerState.loading) {
-          return CircularPercentIndicator(
-            percent: widget.loadingOptions?.progress ?? 0.0,
-            progressColor: widget.loadingOptions?.progressColor,
-            lineWidth: 4.0,
-            backgroundColor: Colors.white,
-            radius: 40,
-            center: widget.loadingOptions?.text == null
-                ? null
-                : Text(
-                    widget.loadingOptions!.text!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-          );
-        } else if (previewerState == PreviewerState.failure) {
-          return Text(
-            widget.previewerOptions.errorMessage ?? 'No preview available',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-            ),
-          );
-        } else {
-          return const CircleLoadingWidget(
-            size: 80,
-            strokeWidth: 4.0,
-          );
-        }
-      },
+    final previewerChild = PreviewerTemplateWidget(
+      previewerOptions: widget.previewerOptions,
+      loadingOptions: widget.loadingOptions,
+      child: PdfPreviewer(
+        bytes: widget.bytes!,
+        controller: _pdfViewerController,
+        fileName: widget.topBarOptions?.title,
+        onTapOutside: widget.onTapOutside,
+        onReady: () => setState(() => _pdfViewerIsReady = true),
+      ),
     );
 
     final topBarChild = ValueListenableBuilder(
@@ -142,7 +107,9 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
     return KeyboardListener(
       focusNode: _keyboardFocusNode,
       autofocus: true,
-      onKeyEvent: _handleKeyboardEventListener,
+      onKeyEvent: (value) {
+        Utils.handleEscapeKey(value, widget.topBarOptions?.onClose);
+      },
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -158,12 +125,5 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
         ],
       ),
     );
-  }
-
-  void _handleKeyboardEventListener(KeyEvent event) {
-    if (event is KeyDownEvent &&
-        event.logicalKey == LogicalKeyboardKey.escape) {
-      widget.topBarOptions?.onClose?.call();
-    }
   }
 }
