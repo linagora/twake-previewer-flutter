@@ -114,7 +114,7 @@ class ExampleViewer extends StatelessWidget {
         child: TwakeImagePreviewer(
           bytes: bytes,
           zoomable: true,
-          previewerOptions: const PreviewerOptions(width: 600),
+          previewerOptions: const PreviewerOptions(width: 600, previewerState: PreviewerState.success),
           topBarOptions: TopBarOptions(
             title: 'Some title',
             onClose: () => debugPrint('onClose'),
@@ -123,12 +123,12 @@ class ExampleViewer extends StatelessWidget {
       );
     }
 
-    if (extension == 'txt') {
+    if (['txt', 'md'].contains(extension)) {
       return Center(
         child: TwakePlainTextPreviewer(
           supportedCharset: SupportedCharset.utf8,
           bytes: bytes,
-          previewerOptions: const PreviewerOptions(width: 600),
+          previewerOptions: const PreviewerOptions(width: 600, previewerState: PreviewerState.success),
           topBarOptions: TopBarOptions(
             title: 'Some title',
             onClose: () => debugPrint('onClose'),
