@@ -69,7 +69,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
       previewerOptions: widget.previewerOptions,
       loadingOptions: widget.loadingOptions,
       child: PdfPreviewer(
-        bytes: widget.bytes!,
+        bytes: widget.bytes ?? Uint8List.fromList([]),
         controller: _pdfViewerController,
         fileName: widget.topBarOptions?.title,
         onTapOutside: widget.onTapOutside,

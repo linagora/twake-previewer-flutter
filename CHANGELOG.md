@@ -1,3 +1,7 @@
+## 0.0.12
+
+- Handle null bytes for PDF with empty byte
+
 ## 0.0.11
 
 - Create a template for all previewers
