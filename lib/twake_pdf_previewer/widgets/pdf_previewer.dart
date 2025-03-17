@@ -64,8 +64,8 @@ class PdfPreviewer extends StatelessWidget {
   ) {
     final viewWidth = MediaQuery.sizeOf(context).width;
     final viewHeight = MediaQuery.sizeOf(context).height;
-    final width = pages.fold(0.0, (prev, page) => max(prev, page.width)) +
-        params.margin * 2;
+    double width = pages.fold(0.0, (prev, page) => max(prev, page.width));
+    width += params.margin * 2;
     final pageLayouts = <Rect>[];
     double top = params.margin;
     for (final page in pages) {

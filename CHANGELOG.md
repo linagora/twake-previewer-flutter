@@ -1,3 +1,8 @@
+## 0.0.13
+
+- Sync loading color to idle previewer state
+- Fix pdf page width progressively bigger with the page number
+
 ## 0.0.12
 
 - Handle null bytes for PDF with empty byte
