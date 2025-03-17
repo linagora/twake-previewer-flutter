@@ -46,9 +46,10 @@ class PreviewerTemplateWidget extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-      _ => const CircleLoadingWidget(
+      _ => CircleLoadingWidget(
           size: 80,
           strokeWidth: 4.0,
+          color: loadingOptions?.progressColor,
         )
     };
   }
