@@ -1,3 +1,7 @@
+## 0.0.14
+
+- Scale down PDF previewer with screen ratio scaling
+
 ## 0.0.13
 
 - Sync loading color to idle previewer state

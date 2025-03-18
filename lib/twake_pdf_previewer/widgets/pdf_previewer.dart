@@ -62,33 +62,32 @@ class PdfPreviewer extends StatelessWidget {
     List<PdfPage> pages,
     PdfViewerParams params,
   ) {
-    final viewWidth = MediaQuery.sizeOf(context).width;
     final viewHeight = MediaQuery.sizeOf(context).height;
-    double width = pages.fold(0.0, (prev, page) => max(prev, page.width));
-    width += params.margin * 2;
+    final width = pages.fold(0.0, (prev, page) => max(prev, page.width));
+    final height = pages.fold(0.0, (prev, page) => max(prev, page.height));
+    final ratio = viewHeight / max(width, height);
     final pageLayouts = <Rect>[];
     double top = params.margin;
     for (final page in pages) {
       pageLayouts.add(
         Rect.fromLTWH(
-          viewWidth > viewHeight ? (width - page.width) / 2 : 0,
+          0,
           top,
-          page.width,
-          page.height,
+          page.width * ratio,
+          page.height * ratio,
         ),
       );
-      top += page.height + params.margin;
+      top += page.height * ratio + params.margin;
     }
 
     return PdfPageLayout(
       pageLayouts: pageLayouts,
-      documentSize: Size(width, top),
+      documentSize: Size(width * ratio, top),
     );
   }
 
   double get _tapOutSideZoneWidth {
-    final documentWidth =
-        controller.documentSize.width - controller.params.margin * 2;
+    final documentWidth = controller.documentSize.width;
     final documentRenderWidth = documentWidth * controller.currentZoom;
     final viewSizeWidth = controller.viewSize.width;
 
@@ -110,7 +109,6 @@ class PdfPreviewer extends StatelessWidget {
         onViewerReady: (document, controller) {
           controller.setZoom(controller.centerPosition, 1);
           onReady?.call();
-          // _showPagination.value = true;
         },
         calculateCurrentPageNumber: _calculateCurrentPageNumber,
         minScale: _minScale,
