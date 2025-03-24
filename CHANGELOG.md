@@ -1,3 +1,7 @@
+## 0.0.15
+
+- Use PDF.js 3.4.120
+
 ## 0.0.14
 
 - Scale down PDF previewer with screen ratio scaling

@@ -39,11 +39,21 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
   final _pdfViewerController = PdfViewerController();
   final _keyboardFocusNode = FocusNode();
   bool _pdfViewerIsReady = false;
+  final _currentPdfJsVersion = '3.4.120';
 
   @override
   void initState() {
     super.initState();
     _previewerState = ValueNotifier(widget.previewerOptions.previewerState);
+    PdfJsConfiguration.configuration = PdfJsConfiguration(
+      pdfJsSrc:
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@$_currentPdfJsVersion/build/pdf.min.js',
+      workerSrc:
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@$_currentPdfJsVersion/build/pdf.worker.min.js',
+      cMapUrl:
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@$_currentPdfJsVersion/cmaps/',
+      cMapPacked: true,
+    );
   }
 
   @override
