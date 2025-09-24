@@ -54,7 +54,7 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withValues(alpha: 0.8),
           borderRadius: const BorderRadius.all(Radius.circular(5))),
       height: 50,
       padding: const EdgeInsetsDirectional.only(start: 16, end: 12),
@@ -102,8 +102,8 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
                     color: _getColorByZoomState(state),
                     size: 24,
                   ),
-                  focusColor: Colors.black.withOpacity(0.3),
-                  hoverColor: Colors.black.withOpacity(0.3),
+                  focusColor: Colors.black.withValues(alpha: 0.3),
+                  hoverColor: Colors.black.withValues(alpha: 0.3),
                   tooltip: widget.zoomOutTooltip,
                 );
               }),
@@ -126,8 +126,8 @@ class _PdfPaginationWidgetState extends State<PdfPaginationWidget> {
                     color: _getColorByZoomState(state),
                     size: 24,
                   ),
-                  focusColor: Colors.black.withOpacity(0.3),
-                  hoverColor: Colors.black.withOpacity(0.3),
+                  focusColor: Colors.black.withValues(alpha: 0.3),
+                  hoverColor: Colors.black.withValues(alpha: 0.3),
                   tooltip: widget.zoomInTooltip,
                 );
               })
