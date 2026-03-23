@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:twake_previewer_flutter/core/previewer_options/options/loading_o
 import 'package:twake_previewer_flutter/core/previewer_options/options/previewer_state.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/top_bar_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/previewer_options.dart';
+import 'package:twake_previewer_flutter/core/utils/text_decoder.dart';
 import 'package:twake_previewer_flutter/core/utils/utils.dart';
 import 'package:twake_previewer_flutter/core/widgets/previewer_template_widget.dart';
 import 'package:twake_previewer_flutter/core/widgets/top_bar_widget.dart';
@@ -35,18 +35,26 @@ class TwakePlainTextPreviewer extends StatefulWidget {
 class _TwakePlainTextPreviewerState extends State<TwakePlainTextPreviewer> {
   String text = '';
   final _focusNode = FocusNode();
+  late final TextDecoder _decoder;
   PreviewerState? _previewerState;
 
   @override
   void initState() {
     super.initState();
+    _decoder = const TextDecoder();
     _previewerState = widget.previewerOptions?.previewerState;
+
     if (widget.bytes != null) {
-      text = switch (widget.supportedCharset) {
-        SupportedCharset.ascii => ascii.decode(widget.bytes!),
-        SupportedCharset.latin1 => latin1.decode(widget.bytes!),
-        _ => utf8.decode(widget.bytes!),
-      };
+      try {
+        text = _decoder.decode(
+          bytes: widget.bytes!,
+          charset: widget.supportedCharset,
+        );
+      } catch (_) {
+        _previewerState = PreviewerState.failure;
+      }
+    } else {
+      _previewerState = PreviewerState.failure;
     }
   }
 
