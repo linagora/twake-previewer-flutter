@@ -3,10 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_previewer_flutter/core/constants/supported_charset.dart';
-import 'package:twake_previewer_flutter/core/utils/text_decoder.dart';
+import 'package:twake_previewer_flutter/core/utils/default_text_decoder.dart';
 
 void main() {
-  const decoder = TextDecoder();
+  const decoder = DefaultTextDecoder();
 
   group('TextDecoder - UTF8', () {
     test('decode valid utf8', () {
@@ -253,6 +253,108 @@ void main() {
       );
 
       expect(asciiResult, latin1Result);
+    });
+  });
+
+  group('TextDecoder - detectCharset', () {
+    test('empty bytes → utf8', () {
+      final result = decoder.detectCharset(Uint8List(0));
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('UTF-8 BOM → utf8', () {
+      final bytes = Uint8List.fromList([0xEF, 0xBB, 0xBF, 0x61]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('ASCII → utf8', () {
+      final bytes = Uint8List.fromList('Hello World'.codeUnits);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('valid 2-byte UTF-8 → utf8', () {
+      final bytes = Uint8List.fromList([0xC3, 0xA9]); // é
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('valid 3-byte UTF-8 → utf8', () {
+      final bytes = Uint8List.fromList([0xE2, 0x82, 0xAC]); // €
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('valid 4-byte UTF-8 → utf8', () {
+      final bytes = Uint8List.fromList([0xF0, 0x9F, 0x98, 0x84]); // 😄
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('invalid leading byte → latin1', () {
+      final bytes = Uint8List.fromList([0xFF]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.latin1);
+    });
+
+    test('incomplete multi-byte sequence → latin1', () {
+      final bytes = Uint8List.fromList([0xE2, 0x82]); // thiếu 1 byte
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.latin1);
+    });
+
+    test('invalid continuation byte → latin1', () {
+      final bytes = Uint8List.fromList([0xE2, 0x28, 0xA1]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.latin1);
+    });
+
+    test('mixed ASCII + UTF-8 → utf8', () {
+      final bytes = Uint8List.fromList([
+        ...'Hello '.codeUnits,
+        0xF0,
+        0x9F,
+        0x98,
+        0x84,
+      ]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('invalid byte in middle → latin1 (early exit)', () {
+      final bytes = Uint8List.fromList([
+        0x61,
+        0x62,
+        0xFF,
+        0x63,
+      ]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.latin1);
+    });
+
+    test('standalone continuation byte → latin1', () {
+      final bytes = Uint8List.fromList([0x80]);
+      final result = decoder.detectCharset(bytes);
+      expect(result, SupportedCharset.latin1);
+    });
+
+    test('valid UTF-8 encoded vietnamese text → utf8', () {
+      const text = 'Xin chào Việt Nam';
+      final bytes = Uint8List.fromList(utf8.encode(text));
+
+      final result = decoder.detectCharset(bytes);
+
+      expect(result, SupportedCharset.utf8);
+    });
+
+    test('UTF-16 codeUnits should NOT be detected as utf8', () {
+      const text = 'Xin chào';
+      final bytes = Uint8List.fromList(text.codeUnits);
+
+      final result = decoder.detectCharset(bytes);
+
+      expect(result, isNot(SupportedCharset.utf8));
     });
   });
 }

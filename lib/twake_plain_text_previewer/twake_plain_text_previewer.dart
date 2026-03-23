@@ -6,6 +6,7 @@ import 'package:twake_previewer_flutter/core/previewer_options/options/loading_o
 import 'package:twake_previewer_flutter/core/previewer_options/options/previewer_state.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/options/top_bar_options.dart';
 import 'package:twake_previewer_flutter/core/previewer_options/previewer_options.dart';
+import 'package:twake_previewer_flutter/core/utils/default_text_decoder.dart';
 import 'package:twake_previewer_flutter/core/utils/text_decoder.dart';
 import 'package:twake_previewer_flutter/core/utils/utils.dart';
 import 'package:twake_previewer_flutter/core/widgets/previewer_template_widget.dart';
@@ -14,18 +15,20 @@ import 'package:twake_previewer_flutter/core/widgets/top_bar_widget.dart';
 class TwakePlainTextPreviewer extends StatefulWidget {
   const TwakePlainTextPreviewer({
     super.key,
-    required this.supportedCharset,
-    this.bytes,
+    required this.bytes,
+    this.supportedCharset,
     this.previewerOptions,
     this.topBarOptions,
     this.loadingOptions,
+    this.textDecoder = const DefaultTextDecoder(),
   });
 
-  final SupportedCharset supportedCharset;
+  final SupportedCharset? supportedCharset;
   final Uint8List? bytes;
   final PreviewerOptions? previewerOptions;
   final TopBarOptions? topBarOptions;
   final LoadingOptions? loadingOptions;
+  final TextDecoder textDecoder;
 
   @override
   State<TwakePlainTextPreviewer> createState() =>
@@ -41,20 +44,27 @@ class _TwakePlainTextPreviewerState extends State<TwakePlainTextPreviewer> {
   @override
   void initState() {
     super.initState();
-    _decoder = const TextDecoder();
     _previewerState = widget.previewerOptions?.previewerState;
+    _decoder = widget.textDecoder;
 
-    if (widget.bytes != null) {
-      try {
-        text = _decoder.decode(
-          bytes: widget.bytes!,
-          charset: widget.supportedCharset,
-        );
-      } catch (_) {
-        _previewerState = PreviewerState.failure;
-      }
+    final result = _buildPreviewText(widget.bytes);
+
+    if (result != null) {
+      text = result;
     } else {
       _previewerState = PreviewerState.failure;
+    }
+  }
+
+  String? _buildPreviewText(Uint8List? bytes) {
+    if (bytes == null || bytes.isEmpty) return null;
+
+    try {
+      final charset = widget.supportedCharset ?? _decoder.detectCharset(bytes);
+
+      return _decoder.decode(bytes: bytes, charset: charset);
+    } catch (_) {
+      return null;
     }
   }
 
