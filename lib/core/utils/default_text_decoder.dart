@@ -49,7 +49,7 @@ class DefaultTextDecoder implements TextDecoder {
       }
       return SupportedCharset.utf8;
     } catch (_) {
-      return SupportedCharset.utf8;
+      return SupportedCharset.latin1;
     }
   }
 
