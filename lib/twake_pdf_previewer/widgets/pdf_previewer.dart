@@ -12,6 +12,7 @@ class PdfPreviewer extends StatelessWidget {
     this.fileName,
     this.onTapOutside,
     this.onReady,
+    this.errorBannerBuilder,
   });
 
   final Uint8List bytes;
@@ -19,6 +20,7 @@ class PdfPreviewer extends StatelessWidget {
   final String? fileName;
   final VoidCallback? onTapOutside;
   final VoidCallback? onReady;
+  final PdfViewerErrorBannerBuilder? errorBannerBuilder;
 
   static const double _minScale = 1;
   static const double _maxScale = 4;
@@ -106,6 +108,7 @@ class PdfPreviewer extends StatelessWidget {
         panAxis: PanAxis.vertical,
         scrollByMouseWheel: 0.5,
         backgroundColor: Colors.transparent,
+        errorBannerBuilder: errorBannerBuilder,
         onViewerReady: (document, controller) {
           controller.setZoom(controller.centerPosition, 1);
           onReady?.call();
