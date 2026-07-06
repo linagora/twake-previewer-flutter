@@ -22,6 +22,7 @@ class TwakePdfPreviewer extends StatefulWidget {
     this.loadingOptions,
     this.topBarOptions,
     this.onTapOutside,
+    this.errorBannerBuilder,
   });
 
   final PreviewerOptions previewerOptions;
@@ -29,6 +30,7 @@ class TwakePdfPreviewer extends StatefulWidget {
   final LoadingOptions? loadingOptions;
   final TopBarOptions? topBarOptions;
   final VoidCallback? onTapOutside;
+  final PdfViewerErrorBannerBuilder? errorBannerBuilder;
 
   @override
   State<TwakePdfPreviewer> createState() => _TwakePdfPreviewerState();
@@ -74,6 +76,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
         fileName: widget.topBarOptions?.title,
         onTapOutside: widget.onTapOutside,
         onReady: () => setState(() => _pdfViewerIsReady = true),
+        errorBannerBuilder: widget.errorBannerBuilder,
       ),
     );
 

@@ -1,3 +1,7 @@
+## 0.1.1
+
+- support errorBannerBuilder
+
 ## 0.0.15
 
 - Use PDF.js 3.4.120
