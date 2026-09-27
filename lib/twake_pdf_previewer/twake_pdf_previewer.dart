@@ -23,6 +23,7 @@ class TwakePdfPreviewer extends StatefulWidget {
     this.topBarOptions,
     this.onTapOutside,
     this.errorBannerBuilder,
+    this.onLinkTap,
   });
 
   final PreviewerOptions previewerOptions;
@@ -31,6 +32,10 @@ class TwakePdfPreviewer extends StatefulWidget {
   final TopBarOptions? topBarOptions;
   final VoidCallback? onTapOutside;
   final PdfViewerErrorBannerBuilder? errorBannerBuilder;
+
+  /// Called when an external link (URL) of the PDF document is tapped.
+  /// Links pointing inside the document are handled by the previewer itself.
+  final ValueChanged<Uri>? onLinkTap;
 
   @override
   State<TwakePdfPreviewer> createState() => _TwakePdfPreviewerState();
@@ -77,6 +82,7 @@ class _TwakePdfPreviewerState extends State<TwakePdfPreviewer> {
         onTapOutside: widget.onTapOutside,
         onReady: () => setState(() => _pdfViewerIsReady = true),
         errorBannerBuilder: widget.errorBannerBuilder,
+        onLinkTap: widget.onLinkTap,
       ),
     );
 
