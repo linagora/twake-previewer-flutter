@@ -13,6 +13,7 @@ class PdfPreviewer extends StatelessWidget {
     this.onTapOutside,
     this.onReady,
     this.errorBannerBuilder,
+    this.onLinkTap,
   });
 
   final Uint8List bytes;
@@ -21,6 +22,7 @@ class PdfPreviewer extends StatelessWidget {
   final VoidCallback? onTapOutside;
   final VoidCallback? onReady;
   final PdfViewerErrorBannerBuilder? errorBannerBuilder;
+  final ValueChanged<Uri>? onLinkTap;
 
   static const double _minScale = 1;
   static const double _maxScale = 4;
@@ -88,6 +90,19 @@ class PdfPreviewer extends StatelessWidget {
     );
   }
 
+  void _handleLinkTap(PdfLink link) {
+    final url = link.url;
+    if (url != null) {
+      onLinkTap?.call(url);
+      return;
+    }
+
+    final dest = link.dest;
+    if (dest != null) {
+      controller.goToDest(dest);
+    }
+  }
+
   double get _tapOutSideZoneWidth {
     final documentWidth = controller.documentSize.width;
     final documentRenderWidth = documentWidth * controller.currentZoom;
@@ -109,6 +124,7 @@ class PdfPreviewer extends StatelessWidget {
         scrollByMouseWheel: 0.5,
         backgroundColor: Colors.transparent,
         errorBannerBuilder: errorBannerBuilder,
+        linkHandlerParams: PdfLinkHandlerParams(onLinkTap: _handleLinkTap),
         onViewerReady: (document, controller) {
           controller.setZoom(controller.centerPosition, 1);
           onReady?.call();
