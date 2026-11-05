@@ -96,6 +96,19 @@ void main() {
     );
 
     testWidgets(
+      'SHOULD NOT forward a link click posted by a nested frame with its view id',
+      (tester) async {
+        final clicks = <Uri?>[];
+        final delivered = tester.runAsync(
+          () => _nextProbe((m) => m == 'nested').timeout(_wait),
+        );
+        await _pumpPreview(tester, _nestedForgery, onClick: clicks.add);
+        await delivered;
+        expect(clicks, isEmpty);
+      },
+    );
+
+    testWidgets(
       'SHOULD NOT forward a link click posted by another iframe with its view id',
       (tester) async {
         final clicks = <Uri?>[];
@@ -151,6 +164,25 @@ const _selectionProbe = '''
   window.addEventListener('message', () => setTimeout(
     () => report('selection:' + window.getSelection().rangeCount), 0));
 </script>''';
+
+const _nestedForgery = '''
+<script>
+  window.addEventListener('load', () => {
+    const view = document.documentElement.innerHTML
+        .match(/"view": "([A-Za-z0-9_-]{10})"/)[1];
+    const child = document.createElement('iframe');
+    child.setAttribute('sandbox', 'allow-scripts');
+    child.srcdoc = '<script>'
+      + 'parent.parent.postMessage(JSON.stringify({view:"' + view
+      + '",message:"iframeHasBeenLoaded"}),"*");'
+      + 'parent.parent.postMessage(JSON.stringify({view:"' + view
+      + '",type:"toDart: onClickHyperLink",url:"https://other.example/b"}),"*");'
+      + 'parent.parent.postMessage(JSON.stringify({probe:"nested"}),"*");'
+      + '</scr' + 'ipt>';
+    document.body.appendChild(child);
+  });
+</script>
+''';
 
 const _hostAccessProbe = '''
 <script>
