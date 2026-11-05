@@ -30,7 +30,7 @@ class HtmlTemplates {
   static String get _onLoadHyperLinkScript => '''
     var hyperLinks = document.querySelectorAll('a');
     for (var i=0; i < hyperLinks.length; i++){
-      hyperLinks[i].addEventListener('click', onClickHyperLink);
+      hyperLinks[i].addEventListener('click', handleOnClickHyperLink);
     }''';
 
   static String getWebViewActionScript(
