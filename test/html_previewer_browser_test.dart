@@ -43,7 +43,42 @@ void main() {
       );
     },
   );
+
+  testWidgets('SHOULD clear its selection when the host posts clearSelection', (
+    tester,
+  ) async {
+    final selected = _nextProbe((m) => m.startsWith('selected:'));
+
+    final iframe = await _pumpPreview(tester, _selectionProbe);
+
+    expect(
+      await tester.runAsync(() => selected.timeout(const Duration(seconds: 5))),
+      isNot('selected:0'),
+    );
+
+    final after = _nextProbe((m) => m.startsWith('selection:'));
+    iframe.contentWindow!.postMessage('{"type":"toIframe: clearSelection"}', '*');
+
+    expect(
+      await tester.runAsync(() => after.timeout(const Duration(seconds: 5))),
+      'selection:0',
+    );
+  });
 }
+
+const _selectionProbe = '''
+<p>text</p>
+<script>
+  function report(p) {
+    window.parent.postMessage(JSON.stringify({probe: p}), '*');
+  }
+  window.addEventListener('load', () => {
+    window.getSelection().selectAllChildren(document.body);
+    report('selected:' + window.getSelection().rangeCount);
+  });
+  window.addEventListener('message', () => setTimeout(
+    () => report('selection:' + window.getSelection().rangeCount), 0));
+</script>''';
 
 const _hostAccessProbe = '''
 <script>

@@ -18,6 +18,11 @@ void main() {
       expect(script, contains('e.source !== window.parent'));
     });
 
+    test('SHOULD clear its selection when the host asks', () {
+      expect(script, contains('toIframe: clearSelection'));
+      expect(script, contains('typeof data["view"] === \'string\''));
+    });
+
     test('SHOULD report its size itself instead of asking the parent', () {
       expect(script, contains('toDart: htmlHeight'));
       expect(script, contains('toDart: htmlWidth'));

@@ -67,11 +67,33 @@ class HtmlTemplates {
           window.removeEventListener('message', handleMessage, false);
         });
       
+        ${_getHandleMessageMethod(createdViewId)}
+        
+        $handleOnClickEmailLinkMethod
+        
+        $handleOnClickHyperLinkMethod
+        
+        ${_getHandleOnLoadMethod(
+      createdViewId,
+      iframeOnLoadMessage: iframeOnLoadMessage,
+      onLoadHyperLinkScript: onLoadHyperLinkScript,
+      onLoadMailtoScript: onLoadMailtoScript,
+    )}
+      </script>''';
+  }
+
+  static String _getHandleMessageMethod(CreatedViewId createdViewId) =>
+      '''
         function handleMessage(e) {
           if (!e || e.source !== window.parent) return;
+          if (e.data === '{"type":"toIframe: clearSelection"}') {
+            var selection = window.getSelection();
+            if (selection) selection.removeAllRanges();
+            return;
+          }
           if (e.data && typeof e.data === 'string' && e.data.includes("toIframe:")) {
             var data = JSON.parse(e.data);
-            if (data["view"].includes("$createdViewId")) {
+            if (typeof data["view"] === 'string' && data["view"].includes("$createdViewId")) {
               if (data["type"].includes("getHeight")) {
                 var height = document.body.scrollHeight;
                 window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: htmlHeight", "height": height}), "*");
@@ -90,11 +112,15 @@ class HtmlTemplates {
             }
           }
         }
-        
-        $handleOnClickEmailLinkMethod
-        
-        $handleOnClickHyperLinkMethod
-        
+      ''';
+
+  static String _getHandleOnLoadMethod(
+    CreatedViewId createdViewId, {
+    required String iframeOnLoadMessage,
+    required String onLoadHyperLinkScript,
+    required String onLoadMailtoScript,
+  }) =>
+      '''
         function handleOnLoad() {
           window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "message": "$iframeOnLoadMessage"}), "*");
           // Measure after the other load handlers have run.
@@ -107,8 +133,7 @@ class HtmlTemplates {
           
           $onLoadMailtoScript
         }
-      </script>''';
-  }
+      ''';
 
   static String getDisableZoomScript() => '''
     <script type="text/javascript">
