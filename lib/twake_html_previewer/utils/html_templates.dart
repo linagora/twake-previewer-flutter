@@ -61,14 +61,15 @@ class HtmlTemplates {
 
     return '''
       <script type="text/javascript">
-        window.parent.addEventListener('message', handleMessage, false);
+        window.addEventListener('message', handleMessage, false);
         window.addEventListener('load', handleOnLoad);
         window.addEventListener('pagehide', (event) => {
-          window.parent.removeEventListener('message', handleMessage, false);
+          window.removeEventListener('message', handleMessage, false);
         });
       
         function handleMessage(e) {
-          if (e && e.data && e.data.includes("toIframe:")) {
+          if (!e || e.source !== window.parent) return;
+          if (e.data && typeof e.data === 'string' && e.data.includes("toIframe:")) {
             var data = JSON.parse(e.data);
             if (data["view"].includes("$createdViewId")) {
               if (data["type"].includes("getHeight")) {
@@ -96,8 +97,11 @@ class HtmlTemplates {
         
         function handleOnLoad() {
           window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "message": "$iframeOnLoadMessage"}), "*");
-          window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toIframe: getHeight"}), "*");
-          window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toIframe: getWidth"}), "*");
+          // Measure after the other load handlers have run.
+          setTimeout(function() {
+            window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: htmlHeight", "height": document.body.scrollHeight}), "*");
+            window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: htmlWidth", "width": document.body.scrollWidth}), "*");
+          }, 0);
           
           $onLoadHyperLinkScript
           
