@@ -185,11 +185,16 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
     return htmlTemplate;
   }
 
+  static const _sandboxPolicy =
+      'allow-scripts allow-popups allow-popups-to-escape-sandbox';
+
   void _setUpWeb() {
     _createdViewId = Utils.getRandString(10);
     _htmlData = _generateHtmlDocument(widget.contentHtml);
 
+    // Opaque origin: previewed HTML cannot reach the host app.
     final iframe = IFrameElement()
+      ..setAttribute('sandbox', _sandboxPolicy)
       ..width = _actualWidth.toString()
       ..height = _actualHeight.toString()
       ..srcdoc = _htmlData
