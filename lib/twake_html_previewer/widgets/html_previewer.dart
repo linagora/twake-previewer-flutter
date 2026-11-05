@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:twake_previewer_flutter/core/utils/utils.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/utils/html_templates.dart';
+import 'package:twake_previewer_flutter/twake_html_previewer/utils/iframe_message_source.dart';
 import 'package:twake_previewer_flutter/twake_html_previewer/utils/twake_dart_ui.dart';
 import 'package:universal_html/html.dart';
 
@@ -69,6 +70,7 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
   String _htmlData = '';
   late final StreamSubscription<MessageEvent> _messageListener;
   bool _iframeLoaded = false;
+  IFrameElement? _iframe;
 
   @override
   void initState() {
@@ -79,6 +81,9 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
     _setUpWeb();
 
     _messageListener = window.onMessage.listen((event) {
+      // The view id is readable inside the frame; only its own window may drive the previewer.
+      if (!isMessageFromIframe(event, _iframe)) return;
+
       var data = json.decode(event.data);
 
       if (data['view'] != _createdViewId) return;
@@ -202,6 +207,7 @@ class _HtmlPreviewerState extends State<HtmlPreviewer> {
       ..style.overflow = 'hidden'
       ..style.width = '100%'
       ..style.height = '100%';
+    _iframe = iframe;
 
     platformViewRegistry.registerViewFactory(_createdViewId, (_) => iframe);
   }
