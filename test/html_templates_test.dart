@@ -18,6 +18,21 @@ void main() {
       expect(script, contains('e.source !== window.parent'));
     });
 
+    test('SHOULD register the hyperlink click handler by its defined name', () {
+      final linkScript = HtmlTemplates.getWebViewActionScript(
+        'view1',
+        iframeOnLoadMessage: 'loaded',
+        hyperLinkClickHandlerAvailable: true,
+        onClickHyperLinkName: 'onClickHyperLink',
+      );
+
+      expect(linkScript, contains('function handleOnClickHyperLink('));
+      expect(
+        linkScript,
+        contains("addEventListener('click', handleOnClickHyperLink)"),
+      );
+    });
+
     test('SHOULD clear its selection when the host asks', () {
       expect(script, contains('toIframe: clearSelection'));
       expect(script, contains('typeof data["view"] === \'string\''));
