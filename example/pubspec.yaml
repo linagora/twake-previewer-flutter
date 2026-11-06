@@ -13,7 +13,7 @@ dependencies:
   twake_previewer_flutter:
     path: ../
 
-  file_picker: any
+  file_picker: ^13.0.0
   universal_html: ^2.0.0
   pointer_interceptor: any
 
