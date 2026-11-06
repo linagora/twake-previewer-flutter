@@ -31,3 +31,5 @@ jobs:
       - run: flutter analyze
 
       - run: flutter test
+
+      - run: flutter test --platform chrome test/html_previewer_browser_test.dart
