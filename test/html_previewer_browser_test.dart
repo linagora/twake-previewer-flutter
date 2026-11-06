@@ -3,6 +3,8 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/widgets.dart';
@@ -62,9 +64,69 @@ void main() {
 
     expect(
       await tester.runAsync(() => after.timeout(const Duration(seconds: 5))),
-      'selection:0',
+      'selection:0:{"type":"toIframe: clearSelection"}',
     );
   });
+
+  testWidgets(
+    'SHOULD keep its selection when a sibling frame posts clearSelection',
+    (tester) async {
+      final selected = _nextProbe((m) => m.startsWith('selected:'));
+      final iframe = await _pumpPreview(tester, _selectionProbe);
+
+      expect(
+        await tester.runAsync(() => selected.timeout(_wait)),
+        isNot('selected:0'),
+      );
+
+      iframe.id = 'preview-frame';
+      final after = _nextProbe((m) => m.contains('toIframe: clearSelection'));
+      final attacker = html.IFrameElement()
+        ..setAttribute('sandbox', 'allow-scripts allow-same-origin')
+        ..srcdoc = '<script>'
+            'parent.document.getElementById("preview-frame").contentWindow'
+            '.postMessage(\'{"type":"toIframe: clearSelection"}\', "*");'
+            '</script>';
+      html.document.body!.append(attacker);
+      addTearDown(attacker.remove);
+
+      expect(
+        await tester.runAsync(() => after.timeout(_wait)),
+        isNot(startsWith('selection:0')),
+      );
+    },
+  );
+
+  testWidgets('SHOULD grow past heightContent after the frame reports its size', (
+    tester,
+  ) async {
+    const heightContent = 300.0;
+    final loaded = Completer<void>.sync();
+    _connectFrameBeforeSrcdoc();
+
+    await _pumpPreview(
+      tester,
+      '<div style="height:800px"></div>',
+      heightContent: heightContent,
+      onLoaded: loaded.complete,
+    );
+
+    await tester.runAsync(() => loaded.future.timeout(_wait));
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<SizedBox>(
+            find.descendant(
+              of: find.byType(HtmlPreviewer),
+              matching: find.byType(SizedBox),
+            ),
+          )
+          .height,
+      greaterThan(heightContent),
+    );
+  });
+
   group('message source', () {
     testWidgets('SHOULD forward a link click posted by its own iframe', (
       tester,
@@ -161,8 +223,8 @@ const _selectionProbe = '''
     window.getSelection().selectAllChildren(document.body);
     report('selected:' + window.getSelection().rangeCount);
   });
-  window.addEventListener('message', () => setTimeout(
-    () => report('selection:' + window.getSelection().rangeCount), 0));
+  window.addEventListener('message', (e) => setTimeout(
+    () => report('selection:' + window.getSelection().rangeCount + ':' + e.data), 0));
 </script>''';
 
 const _nestedForgery = '''
@@ -198,6 +260,8 @@ Future<html.IFrameElement> _pumpPreview(
   WidgetTester tester,
   String content, {
   void Function(Uri?)? onClick,
+  void Function()? onLoaded,
+  double heightContent = 300,
 }) async {
   await tester.pumpWidget(
     Directionality(
@@ -209,9 +273,10 @@ Future<html.IFrameElement> _pumpPreview(
           contentHtml: content,
           contentClassName: 'preview',
           widthContent: 390,
-          heightContent: 300,
+          heightContent: heightContent,
           minHeight: 50,
           onClickHyperLinkAction: onClick,
+          onLoaded: onLoaded,
         ),
       ),
     ),
@@ -227,8 +292,44 @@ Future<html.IFrameElement> _pumpPreview(
   if (iframe.isConnected != true) {
     html.document.body!.append(iframe);
     addTearDown(iframe.remove);
+  } else {
+    // The srcdoc setter already appended this frame.
+    addTearDown(iframe.remove);
   }
   return iframe;
+}
+
+/// A detached frame reports scrollHeight 0. Connect it before srcdoc loads.
+void _connectFrameBeforeSrcdoc() {
+  final object = globalContext['Object'] as JSObject;
+  final proto =
+      (globalContext['HTMLIFrameElement'] as JSObject)['prototype'] as JSObject;
+  final desc = object.callMethod<JSObject>(
+    'getOwnPropertyDescriptor'.toJS,
+    proto,
+    'srcdoc'.toJS,
+  );
+  final originalSet = desc['set'] as JSFunction;
+
+  void setter(JSObject element, JSString value) {
+    if ((element['isConnected'] as JSBoolean?)?.toDart != true) {
+      final body = (globalContext['document'] as JSObject)['body'] as JSObject?;
+      if (body != null) {
+        body.callMethod('appendChild'.toJS, element);
+        element.callMethod('getBoundingClientRect'.toJS);
+      }
+    }
+    originalSet.callAsFunction(element, value);
+  }
+
+  // Browser tests run on the Flutter SDK, which is past this API's 3.6 floor.
+  // ignore: sdk_version_since
+  desc['set'] = setter.toJSCaptureThis;
+  object.callMethod('defineProperty'.toJS, proto, 'srcdoc'.toJS, desc);
+  addTearDown(() {
+    desc['set'] = originalSet;
+    object.callMethod('defineProperty'.toJS, proto, 'srcdoc'.toJS, desc);
+  });
 }
 
 /// Probes post `{"probe": ...}` JSON, because the previewer json-decodes
