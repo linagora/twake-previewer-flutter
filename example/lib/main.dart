@@ -40,13 +40,15 @@ class _MainAppState extends State<MainApp> {
           child: FloatingActionButton(
             child: const Icon(Icons.file_open),
             onPressed: () {
-              FilePicker.platform.pickFiles().then(
-                (value) {
-                  if (value == null || value.files.isEmpty) return;
+              FilePicker.pickFiles().then(
+                (files) async {
+                  if (files.isEmpty) return;
 
+                  final file = files.first;
+                  final fileBytes = await file.readAsBytes();
                   setState(() {
-                    bytes = value.files.single.bytes;
-                    extension = value.files.single.extension;
+                    bytes = fileBytes;
+                    extension = file.extension;
                   });
                 },
                 onError: (error, stackTrace) {
