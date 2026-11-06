@@ -67,7 +67,7 @@ class HtmlTemplates {
           window.removeEventListener('message', handleMessage, false);
         });
       
-        ${_getHandleMessageMethod(createdViewId)}
+        ${_getHandleMessageMethod()}
         
         $handleOnClickEmailLinkMethod
         
@@ -82,34 +82,13 @@ class HtmlTemplates {
       </script>''';
   }
 
-  static String _getHandleMessageMethod(CreatedViewId createdViewId) =>
+  static String _getHandleMessageMethod() =>
       '''
         function handleMessage(e) {
           if (!e || e.source !== window.parent) return;
           if (e.data === '{"type":"toIframe: clearSelection"}') {
             var selection = window.getSelection();
             if (selection) selection.removeAllRanges();
-            return;
-          }
-          if (e.data && typeof e.data === 'string' && e.data.includes("toIframe:")) {
-            var data = JSON.parse(e.data);
-            if (typeof data["view"] === 'string' && data["view"].includes("$createdViewId")) {
-              if (data["type"].includes("getHeight")) {
-                var height = document.body.scrollHeight;
-                window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: htmlHeight", "height": height}), "*");
-              }
-              if (data["type"].includes("getWidth")) {
-                var width = document.body.scrollWidth;
-                window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: htmlWidth", "width": width}), "*");
-              }
-              if (data["type"].includes("execCommand")) {
-                if (data["argument"] === null) {
-                  document.execCommand(data["command"], false);
-                } else {
-                  document.execCommand(data["command"], false, data["argument"]);
-                }
-              }
-            }
           }
         }
       ''';

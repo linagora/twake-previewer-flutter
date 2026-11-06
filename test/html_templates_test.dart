@@ -35,13 +35,14 @@ void main() {
 
     test('SHOULD clear its selection when the host asks', () {
       expect(script, contains('toIframe: clearSelection'));
-      expect(script, contains('typeof data["view"] === \'string\''));
     });
 
     test('SHOULD report its size itself instead of asking the parent', () {
       expect(script, contains('toDart: htmlHeight'));
       expect(script, contains('toDart: htmlWidth'));
-      expect(script, isNot(contains('toIframe: getHeight')));
+      expect(script, isNot(contains('getHeight')));
+      expect(script, isNot(contains('getWidth')));
+      expect(script, isNot(contains('execCommand')));
     });
   });
 }
